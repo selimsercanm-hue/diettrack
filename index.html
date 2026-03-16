@@ -88,7 +88,28 @@ button{cursor:pointer;font-family:'DM Sans',sans-serif}
       <div><label class="lbl">HEDEF YAĞ %</label><input id="s-tgtfat" type="number" placeholder="15"></div>
     </div>
     <label class="lbl">DİYET BİTİŞ TARİHİ</label>
-    <input id="s-deadline" type="date">
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px;margin-bottom:12px">
+      <select id="s-dl-day" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,140,50,0.25);border-radius:14px;color:#f0ede8;font-size:15px;padding:13px 10px;-webkit-appearance:none;outline:none">
+        <option value="">Gün</option>
+        <option>1</option><option>2</option><option>3</option><option>4</option><option>5</option>
+        <option>6</option><option>7</option><option>8</option><option>9</option><option>10</option>
+        <option>11</option><option>12</option><option>13</option><option>14</option><option>15</option>
+        <option>16</option><option>17</option><option>18</option><option>19</option><option>20</option>
+        <option>21</option><option>22</option><option>23</option><option>24</option><option>25</option>
+        <option>26</option><option>27</option><option>28</option><option>29</option><option>30</option><option>31</option>
+      </select>
+      <select id="s-dl-month" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,140,50,0.25);border-radius:14px;color:#f0ede8;font-size:15px;padding:13px 10px;-webkit-appearance:none;outline:none">
+        <option value="">Ay</option>
+        <option value="01">Oca</option><option value="02">Şub</option><option value="03">Mar</option>
+        <option value="04">Nis</option><option value="05">May</option><option value="06">Haz</option>
+        <option value="07">Tem</option><option value="08">Ağu</option><option value="09">Eyl</option>
+        <option value="10">Eki</option><option value="11">Kas</option><option value="12">Ara</option>
+      </select>
+      <select id="s-dl-year" style="background:rgba(255,255,255,0.07);border:1.5px solid rgba(255,140,50,0.25);border-radius:14px;color:#f0ede8;font-size:15px;padding:13px 10px;-webkit-appearance:none;outline:none">
+        <option value="">Yıl</option>
+        <option>2025</option><option>2026</option><option>2027</option>
+      </select>
+    </div>
     <label class="lbl">GÜNLÜK SU HEDEFİ (bardak)</label>
     <input id="s-water" type="number" placeholder="8" value="8">
     <button class="btn" id="setup-btn" type="button">Devam → Diyet Planı Seç</button>
@@ -182,13 +203,16 @@ function doSetup(){
   var h=document.getElementById('s-height').value;
   var cf=document.getElementById('s-curfat').value;
   var tf=document.getElementById('s-tgtfat').value;
-  var dl=document.getElementById('s-deadline').value;
+  var day=document.getElementById('s-dl-day').value;
+  var month=document.getElementById('s-dl-month').value;
+  var year=document.getElementById('s-dl-year').value;
+  var dl=(day&&month&&year)?(year+'-'+month+'-'+((''+day).length===1?'0'+day:day)):'';
   if(!key){alert('API key gir!');return}
   if(!w){alert('Kilo gir!');return}
   if(!h){alert('Boy gir!');return}
   if(!cf){alert('Mevcut yağ % gir!');return}
   if(!tf){alert('Hedef yağ % gir!');return}
-  if(!dl){alert('Bitiş tarihi seç!');return}
+  if(!dl){alert('Bitiş tarihini seç! (Gün/Ay/Yıl)');return}
   var tdee=calcTDEE(+w,+h);
   profile={apiKey:key,weight:+w,height:+h,currentFat:+cf,targetFat:+tf,deadline:dl,tdee:tdee,calorieGoal:Math.round(tdee*0.8),waterGoal:+(document.getElementById('s-water').value)||8,planName:'',planDesc:''};
   sv('profile3',profile);sv('startDate3',today());
