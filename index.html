@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DietTrack</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{height:100%;background:#0a0a0f}
+body{color:#f1f0ee;font-family:-apple-system,BlinkMacSystemFont,sans-serif;padding-bottom:70px}
+.page{display:none;padding:14px}
+.page.active{display:block}
+input{display:block;width:100%;padding:11px 14px;background:rgba(255,255,255,0.07);border:1px solid rgba(251,146,60,0.3);border-radius:12px;color:#fff;font-size:15px;margin-bottom:12px;-webkit-appearance:none;outline:none;box-sizing:border-box}
+input[type=number]::-webkit-inner-spin-button{-webkit-appearance:none}
+.card{background:rgba(255,255,255,0.04);border:1px solid rgba(251,146,60,0.15);border-radius:16px;padding:16px;margin-bottom:12px}
+.card h3{font-size:10px;color:#6b7280;text-transform:uppercase;letter-spacing:1px;font-weight:700;margin-bottom:12px}
+.btn{display:block;width:100%;padding:13px;border-radius:12px;border:none;font-size:14px;font-weight:700;cursor:pointer;margin-bottom:8px;color:#fff;background:linear-gradient(135deg,#fb923c,#f97316)}
+.btn-ghost{background:rgba(255,255,255,0.08);color:#f1f0ee}
+.btn-blue{background:linear-gradient(135deg,#38bdf8,#0ea5e9)}
+.btn-red{background:rgba(239,68,68,0.2);color:#ef4444}
+.row{display:flex;gap:10px}
+.row input{margin-bottom:0}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px}
+.grid2 input{margin-bottom:0}
+.food-item{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:rgba(255,255,255,0.03);border-radius:10px;margin-bottom:6px;border:1px solid rgba(255,255,255,0.05)}
+.food-item .rm{background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.2);color:#ef4444;border-radius:6px;padding:3px 9px;font-size:12px;cursor:pointer}
+.meal-tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}
+.meal-tab{padding:7px 13px;border-radius:20px;border:none;font-size:13px;font-weight:600;background:rgba(255,255,255,0.07);color:#9ca3af;cursor:pointer}
+.meal-tab.active{background:#fb923c;color:#fff}
+.nav{position:fixed;bottom:0;left:0;right:0;display:flex;background:rgba(10,10,15,0.98);border-top:1px solid rgba(251,146,60,0.15);z-index:99}
+.nav-btn{flex:1;padding:10px 2px 8px;border:none;background:transparent;color:#6b7280;display:flex;flex-direction:column;align-items:center;gap:2px;font-size:9px;cursor:pointer;border-top:2px solid transparent;font-family:inherit}
+.nav-btn.active{color:#fb923c;border-top-color:#fb923c;font-weight:700}
+.nav-btn .ic{font-size:20px;line-height:1}
+.prog-bg{height:7px;background:rgba(255,255,255,0.06);border-radius:4px;overflow:hidden;margin-top:5px}
+.prog-fill{height:100%;border-radius:4px;transition:width .5s}
+.stat-box{flex:1;background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.07);border-radius:12px;padding:12px 8px;text-align:center}
+.stat-val{font-size:22px;font-weight:800;line-height:1}
+.stat-lbl{font-size:10px;color:#6b7280;margin-top:3px}
+.big-num{font-size:48px;font-weight:900;line-height:1;text-align:center}
+.zone{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,0.02);border:1px solid rgba(255,255,255,0.05);margin-bottom:6px}
+.zone.active{background:rgba(251,146,60,0.1);border-color:rgba(251,146,60,0.3)}
+.dot{width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,0.15);flex-shrink:0}
+.dot.on{background:#fb923c}
+.tl-row{display:flex;gap:12px;align-items:flex-start;margin-bottom:10px}
+.tl-line{width:2px;background:rgba(251,146,60,0.3);align-self:stretch;margin-top:4px}
+.burn-banner{border-radius:16px;padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center}
+.header{padding:16px 16px 10px;border-bottom:1px solid rgba(251,146,60,0.12);background:rgba(0,0,0,0.5);position:sticky;top:0;z-index:10}
+.title{font-size:20px;font-weight:900;background:linear-gradient(90deg,#fb923c,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:inline-block}
+.badge{font-size:11px;padding:4px 10px;border-radius:20px;font-weight:700;float:right}
+.hint{font-size:12px;color:#6b7280;padding:10px;background:rgba(251,146,60,0.07);border-radius:10px;line-height:1.6;margin-top:8px}
+.food-list{max-height:230px;overflow-y:auto}
+.setup-center{min-height:100vh;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;background:linear-gradient(160deg,#0a0a0f,#1a0f00)}
+</style>
+</head>
+<body>
+
+<div id="setup-screen" class="setup-center" style="display:none">
+  <div style="font-size:28px;font-weight:900;background:linear-gradient(90deg,#fb923c,#fbbf24);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px">🔥 DietTrack</div>
+  <div style="color:#6b7280;font-size:13px;margin-bottom:24px">Hedeflerini gir, takibe başla</div>
+  <div class="card" style="width:100%;max-width:400px">
+    <div class="grid2">
+      <div><label style="font-size:11px;color:#9ca3af;display:block;margin-bottom:4px">KİLO (kg)</label><input id="s-weight" type="number" placeholder="80"></div>
+      <div><label style="font-size:11px;color:#9ca3af;display:block;margin-bottom:4px">BOY (cm)</label><input id="s-height" type="number" placeholder="178"></div>
+    </div>
+    <div class="grid2">
+      <div><label style="font-size:11px;color:#9ca3af;display:block;margin-bottom:4px">MEVCUT YAĞ %</label><input id="s-curfat" type="number" placeholder="22"></div>
+      <div><label style="font-size:11px;color:#9ca3af;display:block;margin-bottom:4px">HEDEF YAĞ %</label><input id="s-tgtfat" type="number" placeholder="15"></div>
+    </div>
+    <label style="font-size:11px;color:#9ca3af;display:block;margin-bottom:4px">DİYET BİTİŞ TARİHİ</label>
+    <input id="s-deadline" type="date">
+    <label style="font-size:11px;color:#9ca3af;display:block;margin-bottom:4px">GÜNLÜK KALORİ HEDEFİ (boş = otomatik)</label>
+    <input id="s-calgoal" type="number" placeholder="Otomatik hesaplanır">
+    <label style="font-size:11px;color:#9ca3af;display:block;margin-bottom:4px">GÜNLÜK SU HEDEFİ (bardak)</label>
+    <input id="s-water" type="number" placeholder="8" value="8">
+    <button class="btn" onclick="doSetup()">Başla →</button>
+  </div>
+</div>
+
+<div id="main-screen" style="display:none">
+  <div class="header" id="main-header"></div>
+  <div id="page-dashboard" class="page active" style="padding-top:14px"></div>
+  <div id="page-meals" class="page" style="padding-top:14px"></div>
+  <div id="page-fasting" class="page" style="padding-top:14px"></div>
+  <div id="page-body" class="page" style="padding-top:14px"></div>
+  <div id="page-settings" class="page" style="padding-top:14px"></div>
+  <nav class="nav">
+    <button class="nav-btn active" onclick="goTab('dashboard',this)"><span class="ic">🏠</span>Özet</button>
+    <button class="nav-btn" onclick="goTab('meals',this)"><span class="ic">🍽️</span>Öğünler</button>
+    <button class="nav-btn" onclick="goTab('fasting',this)"><span class="ic">⏱️</span>Açlık</button>
+    <button class="nav-btn" onclick="goTab('body',this)"><span class="ic">💪</span>Vücut</button>
+    <button class="nav-btn" onclick="goTab('settings',this)"><span class="ic">⚙️</span>Ayarlar</button>
+  </nav>
+</div>
+
+<script>
+// ── helpers ──────────────────────────────────────────────────────────────────
+function ld(k,fb){try{var r=localStorage.getItem(k);return r!==null?JSON.parse(r):fb}catch(e){return fb}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+function today(){return new Date().toISOString().split('T')[0]}
+function fmtTime(iso){if(!iso)return'';return new Date(iso).toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'})}
+function fmtDateShort(s){return new Date(s).toLocaleDateString('tr-TR',{day:'numeric',month:'short'})}
+function daysLeft(dl){return Math.max(0,Math.ceil((new Date(dl)-new Date(today()))/86400000))}
+function calcTDEE(w,h){return Math.round((10*w+6.25*h-5*30+5)*1.55)}
+function hoursAgo(iso){if(!iso)return 0;return(new Date()-new Date(iso))/3600000}
+function pct(v,t){return t?Math.min(100,Math.round(v/t*100)):0}
+function estimateFatG(def){return def>0?((def/7700)*1000).toFixed(1):0}
+function progBar(p,color){return '<div class="prog-bg"><div class="prog-fill" style="width:'+Math.min(p,100)+'%;background:'+color+'"></div></div>'}
+
+var FOODS=[
+  {name:'Yumurta (2 adet)',cal:140,carb:1,prot:12,fat:10},
+  {name:'Tavuk Göğsü (150g)',cal:248,carb:0,prot:46,fat:5},
+  {name:'Somon (150g)',cal:280,carb:0,prot:37,fat:14},
+  {name:'Sığır Eti (150g)',cal:357,carb:0,prot:38,fat:22},
+  {name:'Peynir (50g)',cal:200,carb:0.5,prot:12,fat:17},
+  {name:'Avokado (1/2)',cal:120,carb:2,prot:1.5,fat:11},
+  {name:'Brokoli (100g)',cal:34,carb:7,prot:2.8,fat:0.4},
+  {name:'Ispanak (100g)',cal:23,carb:3.6,prot:2.9,fat:0.4},
+  {name:'Badem (30g)',cal:174,carb:6,prot:6,fat:15},
+  {name:'Zeytinyağı (1 tbs)',cal:119,carb:0,prot:0,fat:14},
+  {name:'Pirinç (100g)',cal:130,carb:28,prot:2.7,fat:0.3},
+  {name:'Ekmek (1 dilim)',cal:79,carb:15,prot:2.7,fat:1},
+  {name:'Muz',cal:89,carb:23,prot:1.1,fat:0.3},
+  {name:'Yulaf (50g)',cal:190,carb:34,prot:6.5,fat:3.5},
+  {name:'Mercimek Çorbası',cal:180,carb:28,prot:10,fat:2},
+  {name:'Protein Bar',cal:200,carb:20,prot:20,fat:6},
+  {name:'Yoğurt (200g)',cal:120,carb:10,prot:10,fat:4},
+  {name:'Kahve (sade)',cal:5,carb:0,prot:0.3,fat:0},
+  {name:'Fındık (30g)',cal:188,carb:5,prot:4,fat:18},
+  {name:'Zeytin (10 adet)',cal:59,carb:3,prot:0.4,fat:6},
+];
+var MEALS=['Kahvaltı','Öğle','Akşam','Atıştırmalık'];
+
+// ── state ─────────────────────────────────────────────────────────────────────
+var profile = ld('profile', null);
+var allData = ld('dietdata', {});
+var selMeal = 'Kahvaltı';
+var searchQ = '';
+
+function getTd(){
+  if(!allData[today()]) allData[today()]={meals:{Kahvaltı:[],Öğle:[],Akşam:[],Atıştırmalık:[]},water:0,weight:null,steps:0,exercise:0,lastMeal:null};
+  return allData[today()];
+}
+function saveTd(){sv('dietdata',allData)}
+
+function addFood(food){
+  var td=getTd(), time=new Date().toISOString();
+  td.meals[selMeal].push(Object.assign({},food,{id:Date.now(),time:time}));
+  td.lastMeal=time; saveTd(); renderAll();
+}
+function rmFood(meal,id){
+  var td=getTd();
+  td.meals[meal]=td.meals[meal].filter(function(f){return f.id!==id});
+  var times=[];
+  MEALS.forEach(function(m){td.meals[m].forEach(function(f){if(f.time)times.push(f.time)})});
+  times.sort(); td.lastMeal=times.length?times[times.length-1]:null;
+  saveTd(); renderAll();
+}
+
+// ── setup ─────────────────────────────────────────────────────────────────────
+function doSetup(){
+  var w=document.getElementById('s-weight').value;
+  var hh=document.getElementById('s-height').value;
+  var cf=document.getElementById('s-curfat').value;
+  var tf=document.getElementById('s-tgtfat').value;
+  var dl=document.getElementById('s-deadline').value;
+  if(!w||!hh||!cf||!tf||!dl){alert('Lütfen tüm zorunlu alanları doldur!');return}
+  var tdee=calcTDEE(+w,+hh);
+  var cg=document.getElementById('s-calgoal').value;
+  var wg=document.getElementById('s-water').value||'8';
+  profile={weight:+w,height:+hh,currentFat:+cf,targetFat:+tf,deadline:dl,tdee:tdee,calorieGoal:cg?+cg:Math.round(tdee*0.8),waterGoal:+wg};
+  sv('profile',profile); sv('startDate',today());
+  start();
+}
+
+function start(){
+  document.getElementById('setup-screen').style.display='none';
+  document.getElementById('main-screen').style.display='block';
+  renderAll();
+}
+
+// ── tab navigation ─────────────────────────────────────────────────────────────
+function goTab(name,btnEl){
+  document.querySelectorAll('.page').forEach(function(p){p.classList.remove('active')});
+  document.getElementById('page-'+name).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(function(b){b.classList.remove('active')});
+  btnEl.classList.add('active');
+  renderAll();
+}
+
+// ── render all ────────────────────────────────────────────────────────────────
+function renderAll(){
+  renderHeader();
+  renderDashboard();
+  renderMeals();
+  renderFasting();
+  renderBody();
+  renderSettings();
+}
+
+function renderHeader(){
+  if(!profile) return;
+  var dl=daysLeft(profile.deadline);
+  var startDate=ld('startDate',today());
+  var totalDays=Math.max(1,Math.ceil((new Date(profile.deadline)-new Date(startDate))/86400000));
+  var passed=totalDays-dl;
+  var color=dl<7?'#ef4444':'#fb923c';
+  document.getElementById('main-header').innerHTML=
+    '<div style="display:flex;justify-content:space-between;align-items:center">'+
+    '<span class="title">🔥 DietTrack</span>'+
+    '<span class="badge" style="background:'+(dl<7?'rgba(239,68,68,0.15)':'rgba(251,146,60,0.12)')+';color:'+color+';border:1px solid '+(dl<7?'rgba(239,68,68,0.3)':'rgba(251,146,60,0.25)')+'">'+dl+' gün kaldı</span>'+
+    '</div>'+
+    '<div style="font-size:11px;color:#6b7280;margin-top:3px">'+new Date().toLocaleDateString('tr-TR',{weekday:'long',day:'numeric',month:'long'})+' · Bitiş: '+new Date(profile.deadline).toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'})+'</div>'+
+    progBar(pct(passed,totalDays),'linear-gradient(90deg,#fb923c,#ef4444)');
+}
+
+function renderDashboard(){
+  var td=getTd();
+  var allFoods=[]; MEALS.forEach(function(m){if(td.meals[m])allFoods=allFoods.concat(td.meals[m])});
+  var totalCal=allFoods.reduce(function(s,f){return s+f.cal},0);
+  var totalCarb=allFoods.reduce(function(s,f){return s+f.carb},0);
+  var totalProt=allFoods.reduce(function(s,f){return s+f.prot},0);
+  var totalFat=allFoods.reduce(function(s,f){return s+f.fat},0);
+  var calGoal=profile.calorieGoal;
+  var waterGoal=profile.waterGoal;
+  var tdee=profile.tdee;
+  var exCal=td.exercise||0;
+  var deficit=tdee-totalCal+exCal;
+  var fh=hoursAgo(td.lastMeal);
+  var burning=fh>=12||(fh>=3&&deficit>300);
+  var burnLabel=fh>=16?'🔥 Güçlü yağ yakımı (16+ saat)':fh>=12?'🔥 Yağ yakım modunda':fh>=3&&deficit>300?'⚡ Kalori açığıyla yağ yakıyor':fh>=3?'😐 Sindirim modu':'🍽️ Henüz öğün girilmedi';
+  var fatBurned=estimateFatG(deficit);
+  var bannerBg=burning?'rgba(251,146,60,0.08)':'rgba(255,255,255,0.03)';
+  var bannerBorder=burning?'rgba(251,146,60,0.3)':'rgba(255,255,255,0.08)';
+
+  document.getElementById('page-dashboard').innerHTML=
+    '<div class="burn-banner" style="background:'+bannerBg+';border:1px solid '+bannerBorder+'">'+
+      '<div>'+
+        '<div style="font-size:13px;font-weight:700;color:'+(burning?'#fb923c':'#6b7280')+';margin-bottom:4px">'+burnLabel+'</div>'+
+        '<div style="font-size:12px;color:#6b7280">Son öğünden: <strong style="color:#f1f0ee">'+fh.toFixed(1)+' saat</strong></div>'+
+        (deficit>0?'<div style="font-size:12px;color:#6b7280;margin-top:2px">Açık: <strong style="color:#4ade80">+'+Math.round(deficit)+' kcal</strong></div>':'')+'</div>'+
+      '<div style="text-align:center;min-width:60px">'+
+        '<div style="font-size:30px;font-weight:900;color:#fb923c;line-height:1">'+fatBurned+'</div>'+
+        '<div style="font-size:10px;color:#6b7280">gr yağ/gün</div>'+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Günlük Özet</h3>'+
+      '<div style="display:flex;justify-content:space-around;margin-bottom:6px">'+
+        miniRing(pct(totalCal,calGoal),totalCal>calGoal?'#ef4444':'#fb923c',Math.round(totalCal),'kcal','Kalori','/ '+calGoal)+
+        miniRing(pct(totalCarb,150),'#a78bfa',Math.round(totalCarb),'g','Karbonhidrat','')+
+        miniRing(pct(td.water,waterGoal),'#38bdf8',td.water,'bardak','Su','/ '+waterGoal)+
+      '</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Makrolar</h3>'+
+      '<div style="display:flex;gap:8px;margin-bottom:12px">'+
+        '<div class="stat-box"><div class="stat-val" style="color:#4ade80">'+Math.round(totalProt)+'<span style="font-size:11px">g</span></div><div class="stat-lbl">Protein</div></div>'+
+        '<div class="stat-box"><div class="stat-val" style="color:#fbbf24">'+Math.round(totalFat)+'<span style="font-size:11px">g</span></div><div class="stat-lbl">Yağ</div></div>'+
+        '<div class="stat-box"><div class="stat-val" style="color:#a78bfa">'+Math.round(totalCarb)+'<span style="font-size:11px">g</span></div><div class="stat-lbl">Karb</div></div>'+
+      '</div>'+
+      '<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin-bottom:3px"><span>Kalori</span><span style="color:'+(deficit>0?'#4ade80':'#ef4444')+'">'+(deficit>0?'+':'')+Math.round(deficit)+' kcal açık</span></div>'+
+      progBar(pct(totalCal,calGoal),totalCal>calGoal?'#ef4444':'#fb923c')+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Su Takibi</h3>'+
+      '<div style="display:flex;flex-wrap:wrap;gap:5px;justify-content:center;margin-bottom:12px">'+
+        Array.from({length:waterGoal}).map(function(_,i){return '<span style="font-size:26px;opacity:'+(i<td.water?1:0.15)+'">💧</span>'}).join('')+
+      '</div>'+
+      '<div style="display:flex;gap:8px">'+
+        '<button class="btn btn-ghost" style="flex:1;margin:0" onclick="changeWater(-1)">−</button>'+
+        '<button class="btn btn-blue" style="flex:2;margin:0" onclick="changeWater(1)">+ Bardak</button>'+
+      '</div>'+
+    '</div>';
+}
+
+function miniRing(p,color,val,unit,label,sub){
+  var size=82,r=size/2,stroke=size*0.1,nr=r-stroke/2;
+  var circ=2*Math.PI*nr, dash=(p/100)*circ;
+  return '<div style="text-align:center">'+
+    '<svg width="'+size+'" height="'+size+'" style="transform:rotate(-90deg)">'+
+    '<circle cx="'+r+'" cy="'+r+'" r="'+nr+'" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="'+stroke+'"/>'+
+    '<circle cx="'+r+'" cy="'+r+'" r="'+nr+'" fill="none" stroke="'+color+'" stroke-width="'+stroke+'" stroke-dasharray="'+dash+' '+circ+'" stroke-linecap="round"/>'+
+    '</svg>'+
+    '<div style="margin-top:-'+size+'px;height:'+size+'px;display:flex;flex-direction:column;align-items:center;justify-content:center">'+
+    '<span style="font-size:15px;font-weight:800;color:'+color+';line-height:1">'+val+'</span>'+
+    '<span style="font-size:8px;color:#6b7280">'+unit+'</span>'+
+    '</div>'+
+    '<div style="margin-top:5px;font-size:11px;color:#6b7280">'+label+'</div>'+
+    (sub?'<div style="font-size:10px;color:#4b5563">'+sub+'</div>':'')+
+  '</div>';
+}
+
+function changeWater(delta){
+  var td=getTd();
+  td.water=Math.max(0,Math.min(profile.waterGoal*2,(td.water||0)+delta));
+  saveTd(); renderAll();
+}
+
+function renderMeals(){
+  var td=getTd();
+  var filtered=FOODS.filter(function(f){return!searchQ||f.name.toLowerCase().includes(searchQ.toLowerCase())});
+  var foodListHTML=filtered.map(function(food,idx){
+    return '<div class="food-item" style="cursor:pointer" onclick="addFoodByIdx('+idx+')">'+
+      '<div><div style="font-size:13px;font-weight:600">'+food.name+'</div>'+
+      '<div style="font-size:11px;color:#6b7280">'+food.cal+' kcal · '+food.carb+'g karb · '+food.prot+'g prot</div></div>'+
+      '<span style="color:#fb923c;font-size:22px;font-weight:300">+</span></div>';
+  }).join('');
+
+  var loggedHTML='';
+  MEALS.forEach(function(meal){
+    if(!td.meals[meal]||!td.meals[meal].length) return;
+    loggedHTML+='<div class="card"><div style="font-size:14px;font-weight:700;color:#fb923c;margin-bottom:10px">'+meal+
+      (td.meals[meal][0]?' <span style="font-size:11px;color:#6b7280;font-weight:400">'+fmtTime(td.meals[meal][0].time)+'</span>':'')+
+      '</div>';
+    td.meals[meal].forEach(function(food){
+      loggedHTML+='<div class="food-item"><div>'+
+        '<div style="font-size:13px;font-weight:600">'+food.name+'</div>'+
+        '<div style="font-size:11px;color:#6b7280">'+food.cal+' kcal · '+fmtTime(food.time)+'</div></div>'+
+        '<button class="rm" onclick="rmFood(\''+meal+'\','+food.id+')">✕</button></div>';
+    });
+    loggedHTML+='</div>';
+  });
+
+  document.getElementById('page-meals').innerHTML=
+    '<div class="card">'+
+      '<h3>Öğün Seç</h3>'+
+      '<div class="meal-tabs">'+
+        MEALS.map(function(m){return '<button class="meal-tab'+(selMeal===m?' active':'')+'" onclick="setMeal(\''+m+'\')">'+m+'</button>'}).join('')+
+      '</div>'+
+      '<input type="text" placeholder="🔍 Besin ara..." value="'+searchQ+'" oninput="doSearch(this.value)">'+
+      '<div class="food-list">'+foodListHTML+'</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Manuel Ekle</h3>'+
+      '<input type="text" id="c-name" placeholder="Besin adı">'+
+      '<div class="grid2">'+
+        '<input type="number" id="c-cal" placeholder="Kalori (kcal)">'+
+        '<input type="number" id="c-carb" placeholder="Karbonhidrat (g)">'+
+        '<input type="number" id="c-prot" placeholder="Protein (g)">'+
+        '<input type="number" id="c-fat" placeholder="Yağ (g)">'+
+      '</div>'+
+      '<button class="btn" onclick="addCustomFood()">+ Ekle</button>'+
+    '</div>'+
+    loggedHTML;
+}
+
+function setMeal(m){selMeal=m;renderMeals()}
+function doSearch(v){searchQ=v;renderMeals()}
+function addFoodByIdx(idx){addFood(FOODS[idx])}
+function addCustomFood(){
+  var n=document.getElementById('c-name').value;
+  var c=document.getElementById('c-cal').value;
+  if(!n||!c){alert('Ad ve kalori zorunlu!');return}
+  addFood({name:n,cal:+c||0,carb:+(document.getElementById('c-carb').value)||0,prot:+(document.getElementById('c-prot').value)||0,fat:+(document.getElementById('c-fat').value)||0});
+}
+
+function renderFasting(){
+  var td=getTd();
+  var fh=hoursAgo(td.lastMeal);
+  var tdee=profile.tdee;
+  var allFoods=[]; MEALS.forEach(function(m){if(td.meals[m])allFoods=allFoods.concat(td.meals[m])});
+  var totalCal=allFoods.reduce(function(s,f){return s+f.cal},0);
+  var deficit=tdee-totalCal+(td.exercise||0);
+  var burning=fh>=12||(fh>=3&&deficit>300);
+  var burnLabel=fh>=16?'🔥 Güçlü yağ yakımı (16+ saat)':fh>=12?'🔥 Yağ yakım modunda (12+ saat)':fh>=3&&deficit>300?'⚡ Kalori açığıyla yağ yakıyor':fh>=3?'😐 Sindirim modu':'🍽️ Henüz öğün girilmedi';
+
+  var mealTimes=[];
+  MEALS.forEach(function(m){if(td.meals[m])td.meals[m].forEach(function(f){if(f.time)mealTimes.push({meal:m,name:f.name,time:f.time,cal:f.cal})})});
+  mealTimes.sort(function(a,b){return new Date(a.time)-new Date(b.time)});
+
+  var tlHTML='';
+  if(mealTimes.length){
+    tlHTML='<div class="card"><h3>Bugünkü Zaman Çizelgesi</h3>';
+    mealTimes.forEach(function(m,i){
+      var gapHTML='';
+      if(i<mealTimes.length-1){
+        var gap=((new Date(mealTimes[i+1].time)-new Date(m.time))/3600000).toFixed(1);
+        gapHTML='<div style="font-size:11px;color:#4b5563;margin-top:2px">⬇ '+gap+' saat sonra</div>';
+      }
+      tlHTML+='<div class="tl-row">'+
+        '<div style="font-size:12px;color:#fb923c;font-weight:700;min-width:42px">'+fmtTime(m.time)+'</div>'+
+        '<div class="tl-line"></div>'+
+        '<div><div style="font-size:13px;font-weight:600">'+m.name+'</div>'+
+        '<div style="font-size:11px;color:#6b7280">'+m.meal+' · '+m.cal+' kcal</div>'+gapHTML+'</div></div>';
+    });
+    var nowT=new Date().toLocaleTimeString('tr-TR',{hour:'2-digit',minute:'2-digit'});
+    tlHTML+='<div class="tl-row">'+
+      '<div style="font-size:12px;color:#6b7280;min-width:42px">'+nowT+'</div>'+
+      '<div class="tl-line" style="background:rgba(255,255,255,0.1)"></div>'+
+      '<div style="font-size:12px;color:#6b7280;font-style:italic">Şu an · '+fh.toFixed(1)+' saattir aç</div></div>';
+    tlHTML+='</div>';
+  }
+
+  var zones=[
+    {l:'0–3 saat',d:'Sindirim & emilim',active:fh<3},
+    {l:'3–8 saat',d:'Glikojen kullanımı',active:fh>=3&&fh<8},
+    {l:'8–12 saat',d:'Yağ yakımı başlıyor',active:fh>=8&&fh<12},
+    {l:'12–16 saat',d:'🔥 Güçlü yağ yakımı',active:fh>=12&&fh<16},
+    {l:'16+ saat',d:'🔥🔥 Maksimum yağ yakımı',active:fh>=16},
+  ];
+
+  document.getElementById('page-fasting').innerHTML=
+    '<div style="text-align:center;background:'+(burning?'rgba(251,146,60,0.08)':'rgba(255,255,255,0.03)')+';border:1px solid '+(burning?'rgba(251,146,60,0.3)':'rgba(255,255,255,0.08)')+';border-radius:16px;padding:24px 16px;margin-bottom:12px">'+
+      '<div style="font-size:50px;margin-bottom:8px">'+(burning?'🔥':'😴')+'</div>'+
+      '<div style="font-size:15px;font-weight:800;color:'+(burning?'#fb923c':'#6b7280')+';margin-bottom:8px">'+burnLabel+'</div>'+
+      '<div style="font-size:44px;font-weight:900;line-height:1;color:#f1f0ee">'+fh.toFixed(1)+'<span style="font-size:16px;color:#6b7280;font-weight:400"> saat</span></div>'+
+      '<div style="font-size:12px;color:#6b7280;margin-top:6px">'+(td.lastMeal?'Son öğün: '+fmtTime(td.lastMeal):'Henüz öğün girilmedi')+'</div>'+
+    '</div>'+
+    '<div class="card"><h3>Açlık Zonları</h3>'+
+      zones.map(function(z){
+        return '<div class="zone'+(z.active?' active':'')+'">'+
+          '<div class="dot'+(z.active?' on':'')+'"></div>'+
+          '<div style="flex:1"><div style="font-size:13px;font-weight:'+(z.active?'700':'400')+';color:'+(z.active?'#f1f0ee':'#6b7280')+'">'+z.l+'</div>'+
+          '<div style="font-size:11px;color:'+(z.active?'#fb923c':'#6b7280')+'">'+z.d+'</div></div>'+
+          (z.active?'<span style="font-size:11px;color:#fb923c;font-weight:700">◀ ŞUAN</span>':'')+
+          '</div>';
+      }).join('')+
+    '</div>'+tlHTML;
+}
+
+function renderBody(){
+  var td=getTd();
+  var allFoods=[]; MEALS.forEach(function(m){if(td.meals[m])allFoods=allFoods.concat(td.meals[m])});
+  var totalCal=allFoods.reduce(function(s,f){return s+f.cal},0);
+  var deficit=profile.tdee-totalCal+(td.exercise||0);
+  var fatBurned=estimateFatG(deficit);
+  var dl=daysLeft(profile.deadline);
+  var wHistory=Object.entries(allData).filter(function(e){return e[1]&&e[1].weight}).sort(function(a,b){return a[0].localeCompare(b[0])});
+  var latestW=profile.weight;
+  if(wHistory.length) latestW=wHistory[wHistory.length-1][1].weight;
+  var curFatKg=((latestW*profile.currentFat)/100).toFixed(1);
+  var tgtFatKg=((latestW*profile.targetFat)/100).toFixed(1);
+  var fatToLose=(curFatKg-tgtFatKg).toFixed(1);
+  var projLoss=((deficit/7700)*dl).toFixed(2);
+
+  var wHistHTML='';
+  if(wHistory.length){
+    wHistHTML='<div class="card"><h3>Kilo Geçmişi</h3>'+
+      wHistory.slice().reverse().slice(0,10).map(function(e){
+        return '<div class="food-item"><span style="font-size:13px;color:#6b7280">'+fmtDateShort(e[0])+'</span><span style="font-weight:700;color:#fb923c">'+e[1].weight+' kg</span></div>';
+      }).join('');
+    if(wHistory.length>=2){
+      var diff=(wHistory[wHistory.length-1][1].weight-wHistory[0][1].weight).toFixed(1);
+      wHistHTML+='<div style="margin-top:8px;padding:10px;background:rgba(251,146,60,0.07);border-radius:10px;font-size:13px;color:'+(diff<=0?'#4ade80':'#ef4444')+'">'+(diff<=0?'📉':'📈')+' Toplam: '+(diff>0?'+':'')+diff+' kg</div>';
+    }
+    wHistHTML+='</div>';
+  }
+
+  document.getElementById('page-body').innerHTML=
+    '<div class="card">'+
+      '<h3>Yağ Oranı Hedefi</h3>'+
+      '<div style="display:flex;justify-content:space-around;align-items:center;margin-bottom:14px">'+
+        '<div style="text-align:center">'+
+          miniRing(profile.currentFat,'#ef4444',profile.currentFat,'%','Başlangıç',curFatKg+' kg yağ')+
+        '</div>'+
+        '<div style="text-align:center;padding:0 8px">'+
+          '<div style="font-size:22px">→</div>'+
+          '<div style="font-size:11px;color:#6b7280">'+fatToLose+' kg<br>yakılacak</div>'+
+        '</div>'+
+        '<div style="text-align:center">'+
+          miniRing(profile.targetFat,'#4ade80',profile.targetFat,'%','Hedef',tgtFatKg+' kg yağ')+
+        '</div>'+
+      '</div>'+
+      '<div class="hint">💡 Günlük ~<strong style="color:#fb923c">'+fatBurned+'g</strong> yağ yakıyorsun. '+dl+' günde tahminen <strong style="color:#fb923c">'+projLoss+' kg</strong> yağ yakılabilir.</div>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Kilo Kaydet</h3>'+
+      '<input type="number" id="w-input" placeholder="Bugünkü kilo (kg)">'+
+      '<button class="btn" onclick="saveWeight()">Kaydet</button>'+
+    '</div>'+
+    '<div class="card">'+
+      '<h3>Adım & Egzersiz</h3>'+
+      '<div class="grid2">'+
+        '<input type="number" id="steps-input" placeholder="Adım sayısı" value="'+(td.steps||'')+'">'+
+        '<input type="number" id="ex-input" placeholder="Egzersiz (kcal)" value="'+(td.exercise||'')+'">'+
+      '</div>'+
+      '<button class="btn" onclick="saveActivity()">Kaydet</button>'+
+      (td.steps?'<div style="display:flex;justify-content:space-between;font-size:12px;color:#6b7280;margin:8px 0 3px"><span>Adımlar</span><span style="color:#4ade80">'+td.steps.toLocaleString()+' / 10.000</span></div>'+progBar(pct(td.steps,10000),'#4ade80'):'')+
+    '</div>'+
+    wHistHTML;
+}
+
+function saveWeight(){
+  var v=parseFloat(document.getElementById('w-input').value);
+  if(isNaN(v)||v<=0){alert('Geçerli kilo gir');return}
+  var td=getTd(); td.weight=v; saveTd(); renderAll();
+}
+function saveActivity(){
+  var s=document.getElementById('steps-input').value;
+  var e=document.getElementById('ex-input').value;
+  var td=getTd();
+  if(s) td.steps=+s;
+  if(e) td.exercise=+e;
+  saveTd(); renderAll();
+}
+
+function renderSettings(){
+  document.getElementById('page-settings').innerHTML=
+    '<div class="card">'+
+      '<h3>Hedefler</h3>'+
+      '<label style="font-size:11px;color:#9ca3af;margin-bottom:4px;display:block">GÜNLÜK KALORİ HEDEFİ (kcal)</label>'+
+      '<div style="font-size:11px;color:#4b5563;margin-bottom:4px">TDEE: '+profile.tdee+' · Önerilen açık: '+Math.round(profile.tdee*0.8)+'</div>'+
+      '<input type="number" id="set-cal" value="'+profile.calorieGoal+'">'+
+      '<label style="font-size:11px;color:#9ca3af;margin-bottom:4px;display:block">GÜNLÜK SU HEDEFİ (bardak)</label>'+
+      '<input type="number" id="set-water" value="'+profile.waterGoal+'">'+
+      '<label style="font-size:11px;color:#9ca3af;margin-bottom:4px;display:block">HEDEF YAĞ %</label>'+
+      '<input type="number" id="set-fat" value="'+profile.targetFat+'">'+
+      '<label style="font-size:11px;color:#9ca3af;margin-bottom:4px;display:block">DİYET BİTİŞ TARİHİ</label>'+
+      '<input type="date" id="set-dl" value="'+profile.deadline+'">'+
+      '<button class="btn" onclick="saveSettings()">Kaydet</button>'+
+    '</div>'+
+    '<div class="card" style="background:rgba(239,68,68,0.05);border-color:rgba(239,68,68,0.15)">'+
+      '<h3>Tehlikeli Alan</h3>'+
+      '<button class="btn btn-red" onclick="resetAll()">🗑 Tüm Verileri Sıfırla</button>'+
+    '</div>';
+}
+function saveSettings(){
+  profile.calorieGoal=+document.getElementById('set-cal').value||profile.calorieGoal;
+  profile.waterGoal=+document.getElementById('set-water').value||profile.waterGoal;
+  profile.targetFat=+document.getElementById('set-fat').value||profile.targetFat;
+  profile.deadline=document.getElementById('set-dl').value||profile.deadline;
+  sv('profile',profile); renderAll(); alert('Kaydedildi!');
+}
+function resetAll(){if(confirm('Tüm veriler silinsin mi?')){localStorage.clear();location.reload()}}
+
+// ── init ──────────────────────────────────────────────────────────────────────
+if(profile){start()}else{document.getElementById('setup-screen').style.display='flex'}
+
+setInterval(renderAll, 60000);
+</script>
+
+</body>
+</html>
