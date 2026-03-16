@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>API Test</title>
+<style>
+body{background:#111;color:#fff;font-family:sans-serif;padding:24px;max-width:500px;margin:0 auto}
+input{width:100%;padding:12px;background:#222;border:1px solid #444;border-radius:10px;color:#fff;font-size:14px;margin-bottom:12px;box-sizing:border-box}
+button{width:100%;padding:14px;background:#ff8c32;border:none;border-radius:10px;color:#fff;font-size:16px;font-weight:700;cursor:pointer}
+#result{margin-top:16px;padding:14px;background:#222;border-radius:10px;font-size:14px;line-height:1.6;min-height:60px;white-space:pre-wrap;word-break:break-all}
+.ok{color:#39e07a}
+.err{color:#ff4d6d}
+.info{color:#aaa}
+</style>
+</head>
+<body>
+<h2>🔑 API Test</h2>
+<p style="color:#aaa;font-size:13px;margin-bottom:16px">API key'inin çalışıp çalışmadığını test et</p>
+<input type="password" id="key" placeholder="sk-ant-api03-...">
+<button id="test-btn">Test Et</button>
+<div id="result"><span class="info">Sonuç burada görünecek...</span></div>
+
+<script>
+document.getElementById('test-btn').addEventListener('click', async function() {
+  var key = document.getElementById('key').value.trim();
+  var result = document.getElementById('result');
+  
+  if(!key) {
+    result.innerHTML = '<span class="err">❌ API key gir!</span>';
+    return;
+  }
+  
+  result.innerHTML = '<span class="info">⏳ Test ediliyor...</span>';
+  this.disabled = true;
+  
+  try {
+    var res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-api-key': key,
+        'anthropic-version': '2023-06-01',
+        'anthropic-dangerous-direct-browser-access': 'true'
+      },
+      body: JSON.stringify({
+        model: 'claude-haiku-4-5-20251001',
+        max_tokens: 50,
+        messages: [{role: 'user', content: 'Merhaba, sadece "Çalışıyor!" yaz.'}]
+      })
+    });
+    
+    var data = await res.json();
+    
+    if(data.error) {
+      result.innerHTML = '<span class="err">❌ Hata: ' + data.error.message + '\n\nTip: ' + data.error.type + '</span>';
+    } else if(data.content && data.content[0]) {
+      result.innerHTML = '<span class="ok">✅ API ÇALIŞIYOR!\n\nCevap: ' + data.content[0].text + '</span>';
+      localStorage.setItem('tested-key', key);
+    } else {
+      result.innerHTML = '<span class="err">❓ Beklenmedik cevap:\n' + JSON.stringify(data, null, 2) + '</span>';
+    }
+  } catch(e) {
+    result.innerHTML = '<span class="err">❌ Bağlantı hatası: ' + e.message + '</span>';
+  }
+  
+  this.disabled = false;
+});
+</script>
+
+</body>
+</html>
