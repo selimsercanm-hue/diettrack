@@ -148,7 +148,7 @@ button:active{transform:scale(0.97)}
     <input id="s-deadline" type="date" style="margin-bottom:10px">
     <label class="label">GÜNLÜK SU HEDEFİ (bardak)</label>
     <input id="s-water" type="number" placeholder="8" value="8" style="margin-bottom:20px">
-    <button class="btn" onclick="doSetup()">Devam → Diyet Planı Seç</button>
+    <button class="btn" id="setup-btn">Devam → Diyet Planı Seç</button>
   </div>
 </div>
 
@@ -855,6 +855,8 @@ renderAll();
 } else {
 document.getElementById(‘setup-screen’).style.display=‘flex’;
 }
+
+document.getElementById(‘setup-btn’).addEventListener(‘click’, doSetup);
 
 setInterval(renderAll, 60000);
 </script>
